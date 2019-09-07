@@ -1,13 +1,33 @@
 
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.41'
-    id 'application'
+    id('application')
+    id 'org.jetbrains.kotlin.jvm' version '1.3.50'
 }
+group 'org.geepawhill.tsd'
+mainClassName = 'org.geepawhill.tsd.app.MainKt'
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = sourceCompatibility
+compileKotlin {
+    kotlinOptions.jvmTarget = sourceCompatibility
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = sourceCompatibility
+}
+
+jar {
+    manifest {
+        attributes(
+                'Application-Name': 'Nodal Pricing Service',
+                'Implementation-Version': "${version}",
+                'Main-Class': "${mainClassName}"
+        )
+    }
 }
 
 dependencies {
@@ -25,10 +45,4 @@ dependencies {
     compile 'no.tornado:tornadofx:1.7.19'
     compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50'
     compile 'org.jetbrains.kotlin:kotlin-reflect:1.3.50'
-
-}
-
-application {
-    // Define the main class for the application
-    mainClassName = 'org.geepawhill.tsd.app.AppKt'
 }
