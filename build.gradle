@@ -1,0 +1,6 @@
+allprojects {
+  group "org.geepawhill.tsd"
+  repositories {
+      jcenter()
+  }
+}
