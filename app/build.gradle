@@ -1,13 +1,9 @@
-
-
 plugins {
-    id('application')
+    id 'application'
     id 'org.jetbrains.kotlin.jvm'
 }
 
 mainClassName = 'org.geepawhill.tsd.app.MainKt'
-
-
 
 jar {
     manifest {
@@ -23,15 +19,12 @@ dependencies {
     // Align versions of all Kotlin components
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
 
-    // Use the Kotlin test library.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    implementation 'no.tornado:tornadofx:1.7.19'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
-    // Use the Kotlin JUnit integration.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
     testImplementation 'org.assertj:assertj-core:3.13.2'
-
-    compile 'no.tornado:tornadofx:1.7.19'
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-    compile 'org.jetbrains.kotlin:kotlin-reflect'
 }
