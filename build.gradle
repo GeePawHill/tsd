@@ -1,0 +1,19 @@
+allprojects { it ->
+    group "org.geepawhill.tsd"
+    repositories {
+        jcenter()
+    }
+
+    it.afterEvaluate { project ->
+        if (project.plugins.hasPlugin('org.jetbrains.kotlin.jvm')) {
+            sourceCompatibility = '1.8'
+            targetCompatibility = sourceCompatibility
+            compileKotlin {
+                kotlinOptions.jvmTarget = sourceCompatibility
+            }
+            compileTestKotlin {
+                kotlinOptions.jvmTarget = sourceCompatibility
+            }
+        }
+    }
+}

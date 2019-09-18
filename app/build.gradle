@@ -1,24 +1,9 @@
-
-
 plugins {
-    id('application')
-    id 'org.jetbrains.kotlin.jvm' version '1.3.50'
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm'
 }
-group 'org.geepawhill.tsd'
+
 mainClassName = 'org.geepawhill.tsd.app.MainKt'
-
-repositories {
-    jcenter()
-}
-
-sourceCompatibility = '1.8'
-targetCompatibility = sourceCompatibility
-compileKotlin {
-    kotlinOptions.jvmTarget = sourceCompatibility
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = sourceCompatibility
-}
 
 jar {
     manifest {
@@ -34,15 +19,13 @@ dependencies {
     // Align versions of all Kotlin components
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
 
-    // Use the Kotlin test library.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    implementation project(":core")
+    implementation 'no.tornado:tornadofx:1.7.19'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
-    // Use the Kotlin JUnit integration.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
     testImplementation 'org.assertj:assertj-core:3.13.2'
-
-    compile 'no.tornado:tornadofx:1.7.19'
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50'
-    compile 'org.jetbrains.kotlin:kotlin-reflect:1.3.50'
 }
