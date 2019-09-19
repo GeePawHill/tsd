@@ -10,6 +10,5 @@ class CoreTest {
     fun testSomeLibraryMethod() {
         val classUnderTest = Library()
         assertThat(classUnderTest.someLibraryMethod()).isTrue()
-        fail("This is a failure.")
     }
 }
