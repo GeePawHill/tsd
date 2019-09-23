@@ -23,9 +23,6 @@ test {
 }
 
 dependencies {
-    // Align versions of all Kotlin components
-    implementation platform('org.jetbrains.kotlin:kotlin-bom')
-
     implementation project(":core")
     implementation project(":tornadofx")
     implementation 'no.tornado:tornadofx:1.7.19'
