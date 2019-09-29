@@ -16,6 +16,10 @@ class TsdOutput {
         soFar[key] = value
     }
 
+    operator fun <T> set(key:String,value:T) {
+        set(key,value.toString())
+    }
+
     operator fun get(key:String):String {
         return soFar[key]!!
     }
@@ -40,6 +44,12 @@ class TsdOutputTest {
     fun `triangulate accepts string value`() {
         output["key"] = "abcd"
         assertThat(output["key"]).isEqualTo("abcd")
+    }
+
+    @Test
+    fun `accepts generic toStringables`() {
+        output["key"] = 3
+        assertThat(output["key"].toInt()).isEqualTo(3)
     }
 
     @Test
