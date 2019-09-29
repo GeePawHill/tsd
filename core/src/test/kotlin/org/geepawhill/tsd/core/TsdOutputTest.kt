@@ -28,23 +28,22 @@ class TsdOutput {
 }
 
 class TsdOutputTest {
+    private val output = TsdOutput()
+
     @Test
     fun `accepts string value`() {
-        val output = TsdOutput()
         output["key"] = "value"
         assertThat(output["key"]).isEqualTo("value")
     }
 
     @Test
     fun `triangulate accepts string value`() {
-        val output = TsdOutput()
         output["key"] = "abcd"
         assertThat(output["key"]).isEqualTo("abcd")
     }
 
     @Test
     fun `accepts multiple keys`() {
-        val output = TsdOutput()
         output["key1"] = "abcd"
         output["key2"] = "efgh"
         assertThat(output["key1"]).isEqualTo("abcd")
@@ -53,7 +52,6 @@ class TsdOutputTest {
 
     @Test
     fun `forbids reassigning keys`() {
-        val output = TsdOutput()
         assertThrows<IllegalKeyException> {
             output["key"] = "abcd"
             output["key"] = "efgh"
@@ -64,7 +62,6 @@ class TsdOutputTest {
     @Test
     fun `forbids periods in key`() {
         assertThrows<IllegalKeyException> {
-            val output = TsdOutput()
             output["key."] = "value"
         }
     }
@@ -72,7 +69,6 @@ class TsdOutputTest {
     @Test
     fun `forbids blank keys`() {
         assertThrows<IllegalKeyException> {
-            val output = TsdOutput()
             output["    "] = "value"
         }
     }
@@ -80,7 +76,6 @@ class TsdOutputTest {
     @Test
     fun `forbids empty keys`() {
         assertThrows<IllegalKeyException> {
-            val output = TsdOutput()
             output[""] = "value"
         }
     }
