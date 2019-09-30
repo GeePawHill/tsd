@@ -6,6 +6,7 @@ import org.junit.jupiter.api.assertThrows
 
 
 class IllegalKeyException(key:String, message:String) : RuntimeException("'$key' is not a legal tsd key, (${message}).")
+class UnknownKeyException(key:String) : RuntimeException("`$key` not found in TSD")
 
 class TsdOutput {
 
@@ -20,8 +21,15 @@ class TsdOutput {
         set(key,value.toString())
     }
 
+    operator fun <T> set(key:String,collection:Collection<T>) {
+        var index = 0
+        collection.forEach {
+            set("$key[${index++}]",it)
+        }
+    }
+
     operator fun get(key:String):String {
-        return soFar[key]!!
+        return soFar.getOrElse(key) { throw UnknownKeyException(key)}
     }
 
     private fun checkSetKey(key:String) {
@@ -47,6 +55,14 @@ class TsdOutputTest {
     }
 
     @Test
+    fun `key get must have value`() {
+        assertThrows<UnknownKeyException> {
+            output["key"]
+        }
+
+    }
+
+    @Test
     fun `accepts generic toStringables`() {
         output["key"] = 3
         assertThat(output["key"].toInt()).isEqualTo(3)
@@ -58,6 +74,15 @@ class TsdOutputTest {
         output["key2"] = "efgh"
         assertThat(output["key1"]).isEqualTo("abcd")
         assertThat(output["key2"]).isEqualTo("efgh")
+    }
+
+    @Test
+    fun `accepts lists`() {
+        val list = listOf("a","b","c")
+        output["key"] = list
+        assertThat(output["key[0]"]).isEqualTo("a")
+        assertThat(output["key[1]"]).isEqualTo("b")
+        assertThat(output["key[2]"]).isEqualTo("c")
     }
 
     @Test
