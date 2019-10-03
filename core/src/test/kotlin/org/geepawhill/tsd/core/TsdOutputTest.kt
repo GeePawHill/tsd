@@ -37,6 +37,13 @@ class TsdOutput {
         }
     }
 
+    operator fun set(key: String, op: () -> Unit) {
+        checkSetKey(key)
+        prefixes.push(key)
+        op()
+        prefixes.pop()
+    }
+
     operator fun get(key: String): String {
         return soFar.getOrElse(key) { throw UnknownKeyException(key) }
     }
@@ -121,6 +128,21 @@ class TsdOutputTest {
         output["tsd"] = NestableTsd("value1", "value2")
         assertThat(output["tsd.field1"]).isEqualTo("value1")
         assertThat(output["tsd.field2"]).isEqualTo("value2")
+    }
+
+    @Test
+    fun `accepts explicit nests`() {
+        output["nest"] = {
+            output["field1"] = "value1"
+            output["field2"] = "value2"
+            output["grandchild"] = {
+                output["field4"] = "value4"
+            }
+        }
+        output.dump()
+        assertThat(output["nest.field1"]).isEqualTo("value1")
+        assertThat(output["nest.field2"]).isEqualTo("value2")
+        assertThat(output["nest.grandchild.field4"]).isEqualTo("value4")
     }
 
     @Test
