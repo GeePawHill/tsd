@@ -3,40 +3,71 @@ package org.geepawhill.tsd.core
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 
 
-class IllegalKeyException(key:String, message:String) : RuntimeException("'$key' is not a legal tsd key, (${message}).")
-class UnknownKeyException(key:String) : RuntimeException("`$key` not found in TSD")
+class IllegalKeyException(key: String, message: String) : RuntimeException("'$key' is not a legal tsd key, (${message}).")
+class UnknownKeyException(key: String) : RuntimeException("`$key` not found in TSD")
 
 class TsdOutput {
 
-    val soFar = mutableMapOf<String,String>()
+    val prefixes = Stack<String>()
+    val soFar = mutableMapOf<String, String>()
 
-    operator fun set(key:String,value:String) {
+    operator fun set(key: String, value: String) {
         checkSetKey(key)
-        soFar[key] = value
+        soFar[addPrefix(key)] = value
     }
 
-    operator fun <T> set(key:String,value:T) {
-        set(key,value.toString())
+    operator fun <T> set(key: String, value: T) {
+        set(key, value.toString())
     }
 
-    operator fun <T> set(key:String,collection:Collection<T>) {
+    operator fun set(key: String, value: Tsd) {
+        checkSetKey(key)
+        prefixes.push(key)
+        value.tsdPut(this)
+        prefixes.pop()
+    }
+
+    operator fun <T> set(key: String, collection: Collection<T>) {
         var index = 0
         collection.forEach {
-            set("$key[${index++}]",it)
+            set("$key[${index++}]", it)
         }
     }
 
-    operator fun get(key:String):String {
-        return soFar.getOrElse(key) { throw UnknownKeyException(key)}
+    operator fun get(key: String): String {
+        return soFar.getOrElse(key) { throw UnknownKeyException(key) }
     }
 
-    private fun checkSetKey(key:String) {
-        if(key.contains(".")) throw IllegalKeyException(key,"contains period")
-        if(key.isBlank()) throw IllegalKeyException(key,"is blank")
-        if(soFar[key]!=null) throw IllegalKeyException(key,"is already assigned")
+    fun dump() {
+        for (entry in soFar.entries) {
+            println("${entry.key}=${entry.value}")
+        }
     }
+
+    private fun checkSetKey(key: String) {
+        if (key.contains(".")) throw IllegalKeyException(key, "contains period")
+        if (key.isBlank()) throw IllegalKeyException(key, "is blank")
+        if (soFar[key] != null) throw IllegalKeyException(key, "is already assigned")
+    }
+
+    private fun addPrefix(key: String) = if (!prefixes.empty()) prefixes.joinToString(".") + "." + key else key
+
+}
+
+interface Tsd {
+    fun tsdPut(output: TsdOutput)
+}
+
+class NestableTsd(val field1: String, val field2: String) : Tsd {
+
+    override fun tsdPut(output: TsdOutput) {
+        output["field1"] = field1
+        output["field2"] = field2
+    }
+
 }
 
 class TsdOutputTest {
@@ -78,11 +109,18 @@ class TsdOutputTest {
 
     @Test
     fun `accepts lists`() {
-        val list = listOf("a","b","c")
+        val list = listOf("a", "b", "c")
         output["key"] = list
         assertThat(output["key[0]"]).isEqualTo("a")
         assertThat(output["key[1]"]).isEqualTo("b")
         assertThat(output["key[2]"]).isEqualTo("c")
+    }
+
+    @Test
+    fun `accepts tsds`() {
+        output["tsd"] = NestableTsd("value1", "value2")
+        assertThat(output["tsd.field1"]).isEqualTo("value1")
+        assertThat(output["tsd.field2"]).isEqualTo("value2")
     }
 
     @Test
