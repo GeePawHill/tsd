@@ -1,43 +1,40 @@
 package org.geepawhill.tsd.core
 
 import org.assertj.core.api.Assertions.assertThat
+import org.geepawhill.tsd.core.TsdWriter.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 
 
-class IllegalKeyException(key: String, message: String) : RuntimeException("'$key' is not a legal tsd key, (${message}).")
-class UnknownKeyException(key: String) : RuntimeException("`$key` not found in TSD")
-
-class TsdOutput {
-
+class TsdOutput : TsdWriter {
     val prefixes = Stack<String>()
-    val soFar = mutableMapOf<String, String>()
+    val keyToLeaf = mutableMapOf<String, String>()
 
-    operator fun set(key: String, value: String) {
+    override operator fun set(key: String, value: String) {
         checkSetKey(key)
-        soFar[addPrefix(key)] = value
+        keyToLeaf[addPrefix(key)] = value
     }
 
-    operator fun <T> set(key: String, value: T) {
+    override operator fun <T> set(key: String, value: T) {
         set(key, value.toString())
     }
 
-    operator fun set(key: String, value: Tsd) {
+    override operator fun set(key: String, value: Tsd) {
         checkSetKey(key)
         prefixes.push(key)
         value.tsdPut(this)
         prefixes.pop()
     }
 
-    operator fun <T> set(key: String, collection: Collection<T>) {
+    override operator fun <T> set(key: String, collection: Collection<T>) {
         var index = 0
         collection.forEach {
             set("$key[${index++}]", it)
         }
     }
 
-    operator fun set(key: String, op: () -> Unit) {
+    override operator fun set(key: String, op: () -> Unit) {
         checkSetKey(key)
         prefixes.push(key)
         op()
@@ -45,11 +42,11 @@ class TsdOutput {
     }
 
     operator fun get(key: String): String {
-        return soFar.getOrElse(key) { throw UnknownKeyException(key) }
+        return keyToLeaf.getOrElse(key) { throw UnknownKeyException(key) }
     }
 
     fun dump() {
-        for (entry in soFar.entries) {
+        for (entry in keyToLeaf.entries) {
             println("${entry.key}=${entry.value}")
         }
     }
@@ -57,20 +54,17 @@ class TsdOutput {
     private fun checkSetKey(key: String) {
         if (key.contains(".")) throw IllegalKeyException(key, "contains period")
         if (key.isBlank()) throw IllegalKeyException(key, "is blank")
-        if (soFar[key] != null) throw IllegalKeyException(key, "is already assigned")
+        if (keyToLeaf[key] != null) throw IllegalKeyException(key, "is already assigned")
     }
 
     private fun addPrefix(key: String) = if (!prefixes.empty()) prefixes.joinToString(".") + "." + key else key
 
 }
 
-interface Tsd {
-    fun tsdPut(output: TsdOutput)
-}
 
 class NestableTsd(val field1: String, val field2: String) : Tsd {
 
-    override fun tsdPut(output: TsdOutput) {
+    override fun tsdPut(output: TsdWriter) {
         output["field1"] = field1
         output["field2"] = field2
     }
