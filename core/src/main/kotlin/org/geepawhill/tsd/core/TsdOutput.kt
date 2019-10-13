@@ -36,6 +36,13 @@ class TsdOutput : TsdWriter {
         prefixes.pop()
     }
 
+    override fun build(builder: TsdBuilder) {
+        keyToLeaf.entries.toList().sortedBy { it.key }.forEach {
+            val nodes = it.key.split(".")
+            builder.leaf(it.key, nodes.last(), it.value)
+        }
+    }
+
     operator fun get(key: String): String {
         return keyToLeaf.getOrElse(key) { throw TsdWriter.UnknownKeyException(key) }
     }

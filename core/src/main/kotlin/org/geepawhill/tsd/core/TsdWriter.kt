@@ -9,4 +9,6 @@ interface TsdWriter {
     operator fun set(key: String, value: Tsd)
     operator fun <T> set(key: String, collection: Collection<T>)
     operator fun set(key: String, op: () -> Unit)
+
+    fun build(builder: TsdBuilder)
 }

@@ -16,6 +16,22 @@ class NestableTsd(val field1: String, val field2: String) : Tsd {
 
 }
 
+class TestingTsdBuilder : TsdBuilder {
+
+    val calls = mutableListOf<String>()
+
+    override fun open(path: String, node: String) {
+    }
+
+    override fun leaf(path: String, node: String, value: String) {
+        calls += "C-$node-$value"
+    }
+
+    override fun close(path: String, node: String) {
+    }
+
+}
+
 class TsdOutputTest {
     private val output = TsdOutput()
 
@@ -36,7 +52,6 @@ class TsdOutputTest {
         assertThrows<UnknownKeyException> {
             output["key"]
         }
-
     }
 
     @Test
@@ -78,7 +93,6 @@ class TsdOutputTest {
                 output["field4"] = "value4"
             }
         }
-        output.dump()
         assertThat(output["nest.field1"]).isEqualTo("value1")
         assertThat(output["nest.field2"]).isEqualTo("value2")
         assertThat(output["nest.grandchild.field4"]).isEqualTo("value4")
@@ -112,6 +126,21 @@ class TsdOutputTest {
         assertThrows<IllegalKeyException> {
             output[""] = "value"
         }
+    }
+
+    @Test
+    fun `empty output doesn't call builder`() {
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).isEmpty()
+    }
+
+    @Test
+    fun `builds one leaf`() {
+        output["leaf"] = "value"
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).containsExactly("C-leaf-value")
     }
 
 }
