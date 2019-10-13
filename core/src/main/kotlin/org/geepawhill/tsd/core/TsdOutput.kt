@@ -37,9 +37,16 @@ class TsdOutput : TsdWriter {
     }
 
     override fun build(builder: TsdBuilder) {
+        val parents = mutableListOf<String>()
         keyToLeaf.entries.toList().sortedBy { it.key }.forEach {
             val nodes = it.key.split(".")
-            builder.leaf(it.key, nodes.last(), it.value)
+            nodes.dropLast(1).forEach { parent ->
+                builder.open(parent)
+            }
+            builder.leaf(nodes.last(), it.value)
+            nodes.dropLast(1).reversed().forEach { parent ->
+                builder.close(parent)
+            }
         }
     }
 

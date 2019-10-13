@@ -20,14 +20,16 @@ class TestingTsdBuilder : TsdBuilder {
 
     val calls = mutableListOf<String>()
 
-    override fun open(path: String, node: String) {
+    override fun open(node: String) {
+        calls += "O-$node"
     }
 
-    override fun leaf(path: String, node: String, value: String) {
+    override fun leaf(node: String, value: String) {
         calls += "L-$node-$value"
     }
 
-    override fun close(path: String, node: String) {
+    override fun close(node: String) {
+        calls += "C-$node"
     }
 
 }
@@ -159,6 +161,28 @@ class TsdOutputTest {
         val builder = TestingTsdBuilder()
         output.build(builder)
         assertThat(builder.calls).containsExactly("L-a-value", "L-b-value")
+    }
+
+    @Test
+    fun `builds a simple 2-tree`() {
+        output["parent"] = {
+            output["child"] = "value"
+        }
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).containsExactly("O-parent", "L-child-value", "C-parent")
+    }
+
+    @Test
+    fun `builds a simple 3-tree`() {
+        output["parent"] = {
+            output["child"] = {
+                output["grandchild"] = "value"
+            }
+        }
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).containsExactly("O-parent", "O-child", "L-grandchild-value", "C-child", "C-parent")
     }
 
 }
