@@ -24,7 +24,7 @@ class TestingTsdBuilder : TsdBuilder {
     }
 
     override fun leaf(path: String, node: String, value: String) {
-        calls += "C-$node-$value"
+        calls += "L-$node-$value"
     }
 
     override fun close(path: String, node: String) {
@@ -140,7 +140,25 @@ class TsdOutputTest {
         output["leaf"] = "value"
         val builder = TestingTsdBuilder()
         output.build(builder)
-        assertThat(builder.calls).containsExactly("C-leaf-value")
+        assertThat(builder.calls).containsExactly("L-leaf-value")
+    }
+
+    @Test
+    fun `builds two leafs`() {
+        output["a"] = "value"
+        output["b"] = "value"
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).containsExactly("L-a-value", "L-b-value")
+    }
+
+    @Test
+    fun `builds two leafs in sorted order`() {
+        output["b"] = "value"
+        output["a"] = "value"
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).containsExactly("L-a-value", "L-b-value")
     }
 
 }
