@@ -37,18 +37,43 @@ class TsdOutput : TsdWriter {
     }
 
     override fun build(builder: TsdBuilder) {
-        val parents = mutableListOf<String>()
+        val opens = mutableListOf<String>()
         keyToLeaf.entries.toList().sortedBy { it.key }.forEach {
             val nodes = it.key.split(".")
-            nodes.dropLast(1).forEach { parent ->
-                builder.open(parent)
+            val parents = nodes.dropLast(1)
+            val firstDifference = findFirstDifference(opens, parents)
+            closeOpens(builder, opens, firstDifference)
+            if (firstDifference != -1) {
+                for (toOpen in firstDifference until parents.size) {
+                    builder.open(parents[toOpen])
+                    opens.add(parents[toOpen])
+                }
             }
             builder.leaf(nodes.last(), it.value)
-            nodes.dropLast(1).reversed().forEach { parent ->
-                builder.close(parent)
-            }
+        }
+        if (opens.isNotEmpty()) closeOpens(builder, opens, 0)
+    }
+
+    private fun closeOpens(builder: TsdBuilder, opens: MutableList<String>, firstDifference: Int) {
+        if (firstDifference == -1) return
+        var toRemove = opens.size - 1
+        while (toRemove >= firstDifference) {
+            builder.close(opens[toRemove])
+            opens.removeAt(toRemove)
+            toRemove -= 1
         }
     }
+
+    private fun findFirstDifference(opens: MutableList<String>, parents: List<String>): Int {
+        for (nodeIndex in 0 until opens.size) {
+            if (nodeIndex < parents.size) {
+                if (parents[nodeIndex] != opens[nodeIndex]) return nodeIndex
+            }
+        }
+        if (parents.size > opens.size) return 0
+        return -1
+    }
+
 
     operator fun get(key: String): String {
         return keyToLeaf.getOrElse(key) { throw TsdWriter.UnknownKeyException(key) }
