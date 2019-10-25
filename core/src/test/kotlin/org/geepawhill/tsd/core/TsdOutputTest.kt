@@ -196,4 +196,21 @@ class TsdOutputTest {
         assertThat(builder.calls).containsExactly("O-parent", "L-child1-value", "L-child2-value", "C-parent")
     }
 
+    @Test
+    fun `builds a mixed multi-child tree`() {
+        output["parent1"] = {
+            output["child1"] = "value"
+            output["child2"] = "value"
+        }
+        output["parent2"] = {
+            output["child3"] = {
+                output["grandchild1"] = "value"
+                output["grandchild2"] = "value"
+            }
+        }
+        val builder = TestingTsdBuilder()
+        output.build(builder)
+        assertThat(builder.calls).containsExactly("O-parent1", "L-child1-value", "L-child2-value", "C-parent1", "O-parent2", "O-child3", "L-grandchild1-value", "L-grandchild2-value", "C-child3", "C-parent2")
+    }
+
 }
