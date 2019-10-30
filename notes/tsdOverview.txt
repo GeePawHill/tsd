@@ -1,0 +1,12 @@
+TSD Season Overview
+    TSD - Tree Shaped Data
+        https://github.com/GeePawHill/tsd
+
+    Implicit Trees
+        Capturing
+        Filtering
+        Comparing
+        Rendering
+
+        
+
